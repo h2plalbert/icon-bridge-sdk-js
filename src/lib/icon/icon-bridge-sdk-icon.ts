@@ -1,7 +1,7 @@
 // icon-bridge-sdk-icon.ts
 //
 const Exception = require("../../utils/exception");
-import localWebLib from './webLib';
+import localWebLib from "./webLib";
 // const EspaniconSDK = require("@espanicon/espanicon-sdk");
 
 // types
@@ -46,15 +46,14 @@ class IconBridgeSDKIcon {
       queryTypeMethod: this.#iconWeb3.queryTypeMethod,
       decimalToHex: this.#iconWeb3.decimalToHex,
       getIcxBalance: this.#iconWeb3.getIcxBalance
-    }
+    };
     this.methods = {
       ...this.superMethods
     };
     this.web = {
       ...this.#web
-    }
+    };
   }
-
 
   // ######################################################################
   /**
@@ -441,7 +440,7 @@ class IconBridgeSDKIcon {
         );
         return { error: errorResult.toString() };
       }
-    },
+    }
   };
 
   #web = {
@@ -596,10 +595,8 @@ class IconBridgeSDKIcon {
           false
         );
 
-        const parsedValues = _values.map(value => {
-          return this.#iconWeb3.decimalToHex(
-            Number(value)*(10**18)
-          )
+        const parsedValues = _values.map((value) => {
+          return this.#iconWeb3.decimalToHex(Number(value) * 10 ** 18);
         });
 
         const txRequest = await localWebLib.makeTxRequest(
@@ -803,19 +800,19 @@ class IconBridgeSDKIcon {
         );
 
         const queryParams: {
-          _name: string,
-          _symbol: string,
-          _decimals: string,
-          _feeNumerator: string,
-          _fixedFee: string,
-          _addr?: string
+          _name: string;
+          _symbol: string;
+          _decimals: string;
+          _feeNumerator: string;
+          _fixedFee: string;
+          _addr?: string;
         } = {
           _name: _name,
           _symbol: _symbol,
           _decimals: _decimals,
           _feeNumerator: _feeNumerator,
           _fixedFee: _fixedFee
-        }
+        };
 
         if (_addr != null) {
           queryParams["_addr"] = _addr;
@@ -1015,10 +1012,7 @@ class IconBridgeSDKIcon {
 
     /*
      */
-    addRestriction: async (
-      from: string,
-      stepLimit: string
-    ): Promise<any> => {
+    addRestriction: async (from: string, stepLimit: string): Promise<any> => {
       try {
         const isMainnet: boolean =
           this.#params.useMainnet == null ? true : this.#params.useMainnet;
@@ -1091,7 +1085,7 @@ class IconBridgeSDKIcon {
         );
         return { error: errorResult.toString() };
       }
-    },
+    }
   };
 
   private makeReadonlyQuery = async (
@@ -1119,12 +1113,21 @@ class IconBridgeSDKIcon {
       this.queryMethod
     );
 
+    console.log(
+      "btsContract",
+      btsContract,
+      isMainnet,
+      methodName,
+      methodParams,
+      this.#params.iconProvider.hostname,
+      JSONRPCObject,
+      this.queryMethod
+    );
+
     return request;
   };
 
-  private parseTxParams = (
-    txParams: any,
-  ) => {
+  private parseTxParams = (txParams: any) => {
     const txObj = this.#iconWeb3.makeJSONRPCRequestObj("icx_sendTransaction");
     txObj["params"] = { ...txParams };
     return txObj;

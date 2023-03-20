@@ -5,66 +5,85 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dbService = void 0;
 const joi_1 = __importDefault(require("joi"));
-const networks_1 = require("./networks");
 const contracts_1 = require("./contracts");
-const networkArray = Object.keys(networks_1.networks);
-const bscValidLabels = [
+const networks_1 = require("./networks");
+const networks_2 = require("./networks");
+const CHAINS = Object.keys(networks_2.chains);
+const BSC_VALID_LABELS = [
     ...contracts_1.tokenLabels.filter((el) => el !== contracts_1.labels.bnb),
     contracts_1.labels.BMCManagement,
     contracts_1.labels.BMCPeriphery,
     contracts_1.labels.BTSCore,
     contracts_1.labels.BTSPeriphery
 ];
-const EXACT_NO_LABELS_IN_BSC = bscValidLabels.length + 1;
-const iconValidLabels = [
+const ICON_VALID_LABELS = [
     ...contracts_1.tokenLabels.filter((el) => el !== contracts_1.labels.icx),
     contracts_1.labels.bmc,
     contracts_1.labels.bts
 ];
-const _schema = joi_1.default.object({
-    bsc: joi_1.default.object()
-        .pattern(joi_1.default.any().valid(...networkArray), joi_1.default.object({
-        genericToken: joi_1.default.any()
-    })
-        .pattern(joi_1.default.any().valid(...bscValidLabels), joi_1.default.object({
-        abi: joi_1.default.any(),
-        address: joi_1.default.string()
-            .pattern(/0x([a-fA-F0-9]{40})/)
-            .required(),
-        implementation: joi_1.default.object({
-            address: joi_1.default.string().allow(null),
-            abi: joi_1.default.any()
+const _configSchema = joi_1.default.object({
+    network: joi_1.default.object()
+        .pattern(joi_1.default.any().valid(...CHAINS), joi_1.default.object({
+        network_id: joi_1.default.string().required(),
+        btp_network_id: joi_1.default.string().required(),
+        block_height: joi_1.default.number().required(),
+        provider: joi_1.default.object({
+            hostname: joi_1.default.string()
+                .pattern(/^((https|http):\/\/)?(([a-zA-Z0-9-]{1,}\.){1,}([a-zA-Z0-9]{1,63}))(:[0-9]{2,5})?(\/.*)?$/)
+                .required(),
+            nid: joi_1.default.number().required()
         })
     }))
-        .length(EXACT_NO_LABELS_IN_BSC))
-        .length(networkArray.length)
-        .required(),
-    icon: joi_1.default.object()
-        .pattern(joi_1.default.any().valid(...networkArray), joi_1.default.object()
-        .pattern(joi_1.default.any().valid(...iconValidLabels), joi_1.default.object({
-        address: joi_1.default.string()
-            .pattern(/cx([a-fA-F0-9]{40})/)
-            .required()
-    }))
-        .length(iconValidLabels.length))
-        .length(networkArray.length)
-        .required()
+        .length(CHAINS.length),
+    contract: joi_1.default.object({
+        bsc: joi_1.default.object()
+            .pattern(joi_1.default.any().valid(...BSC_VALID_LABELS), joi_1.default.object({
+            address: joi_1.default.string()
+                .pattern(/0x([a-fA-F0-9]{40})/)
+                .required(),
+            implementation: joi_1.default.object({
+                address: joi_1.default.string()
+                    .pattern(/0x([a-fA-F0-9]{40})/)
+                    .allow(null)
+            })
+        }))
+            .length(BSC_VALID_LABELS.length),
+        icon: joi_1.default.object()
+            .pattern(joi_1.default.any().valid(...ICON_VALID_LABELS), joi_1.default.object({
+            address: joi_1.default.string()
+                .pattern(/cx([a-fA-F0-9]{40})/)
+                .required()
+        }))
+            .length(ICON_VALID_LABELS.length)
+    }).required()
 });
-function _validateAbiData(data) {
-    const { error } = _schema.validate(data);
+function _validateConfigData(data) {
+    const { error } = _configSchema.validate(data);
     if (error) {
-        throw new Error(`Invalid external abi data. Error: ${JSON.stringify(error.message, null, 1)}`);
+        throw new Error(`Invalid external config data. Error: \n${error.details
+            .map((el) => el.message)
+            .join("\n")}`);
     }
 }
 function _dbService() {
-    let abiData = require("../../data/abiData.js");
+    const abiData = require("../../data/abiData.js");
     return {
         read() {
             return abiData;
         },
-        write(data) {
-            _validateAbiData(data);
-            abiData = data;
+        write(network, data) {
+            _validateConfigData(data);
+            Object.entries(data.contract).forEach(([chain, chainData]) => {
+                Object.entries(chainData).forEach(([label, labelData]) => {
+                    abiData[chain][network][label].address = labelData.address;
+                    if (labelData.implementation) {
+                        abiData[chain][network][label].implementation.address = labelData.implementation.address;
+                    }
+                });
+            });
+            Object.entries(data.network).forEach(([chain, chainData]) => {
+                networks_1.networks[network][chain] = Object.assign(Object.assign({}, networks_1.networks[network][chain]), chainData);
+            });
         }
     };
 }

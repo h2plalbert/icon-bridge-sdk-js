@@ -9,10 +9,43 @@ type Provider = {
   nid: null | number;
 };
 
+type Config = {
+  network: Record<
+    string,
+    {
+      network_id: string;
+      btp_network_id: string;
+      block_height: number;
+      provider: {
+        hostname: string;
+        nid: number;
+      };
+    }
+  >;
+  contract: {
+    bsc: Record<
+      string,
+      {
+        address: string;
+        implementation: {
+          address: string | null;
+        };
+      }
+    >;
+    icon: Record<
+      string,
+      {
+        address: string;
+      }
+    >;
+  };
+};
+
 type InputParams = {
   useMainnet: null | boolean;
   iconProvider?: Provider;
   bscProvider?: Provider;
+  config?: Config;
 };
 
 type Tx = {
@@ -124,12 +157,13 @@ class IconBridgeSDK {
           data: encodedData
         });
       } else {
-        const contractMethodCallResponseRaw = await this.sdkUtils.makeEthJsonRpcReadonlyQuery(
-          this.params.bscProvider.hostname,
-          BTSProxyContractAddress,
-          encodedData,
-          queryMethod
-        );
+        const contractMethodCallResponseRaw =
+          await this.sdkUtils.makeEthJsonRpcReadonlyQuery(
+            this.params.bscProvider.hostname,
+            BTSProxyContractAddress,
+            encodedData,
+            queryMethod
+          );
         if (contractMethodCallResponseRaw.error != null) {
           throw new Error(JSON.stringify(contractMethodCallResponseRaw));
         }
@@ -492,7 +526,7 @@ class IconBridgeSDK {
     }
 
     // get tx object
-    const parsedGas = gas === null ? 2000000 : gas 
+    const parsedGas = gas === null ? 2000000 : gas;
     const tx: Tx = {
       from: from,
       to: contractAddress,
@@ -506,7 +540,7 @@ class IconBridgeSDK {
     if (amount != null) {
       tx["value"] = this.sdkUtils.decimalToHex(
         Number(web3Wrapper.utils.toWei(amount, "ether"))
-      )
+      );
     }
 
     // if useWeb is true return the unsigned tx object
@@ -520,15 +554,16 @@ class IconBridgeSDK {
     // making readonly call
     let contractMethodCallResponse = null;
     if (queryMethod == null) {
-      contractMethodCallResponse = await web3Wrapper.eth
-      .sendSignedTransaction(signedTx.rawTransaction);
-    } else {
-      const contractMethodCallResponseRaw = await this.sdkUtils
-      .makeEthSendRawTransactionQuery(
-        this.params.bscProvider.hostname,
-        signedTx.rawTransaction,
-        queryMethod
+      contractMethodCallResponse = await web3Wrapper.eth.sendSignedTransaction(
+        signedTx.rawTransaction
       );
+    } else {
+      const contractMethodCallResponseRaw =
+        await this.sdkUtils.makeEthSendRawTransactionQuery(
+          this.params.bscProvider.hostname,
+          signedTx.rawTransaction,
+          queryMethod
+        );
       if (contractMethodCallResponseRaw.error != null) {
         throw new Error(JSON.stringify(contractMethodCallResponseRaw));
       }

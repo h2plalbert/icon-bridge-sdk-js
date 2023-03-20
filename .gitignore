@@ -3,3 +3,4 @@ node_modules/
 .local
 *.swp
 *.bkp*
+.DS_Store

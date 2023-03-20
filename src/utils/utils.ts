@@ -17,11 +17,43 @@ type Provider = {
   nid: null | number;
 };
 
+type Config = {
+  network: Record<
+    string,
+    {
+      network_id: string;
+      btp_network_id: string;
+      block_height: number;
+      provider: {
+        hostname: string;
+        nid: number;
+      };
+    }
+  >;
+  contract: {
+    bsc: Record<
+      string,
+      {
+        address: string;
+        implementation: {
+          address: string | null;
+        };
+      }
+    >;
+    icon: Record<
+      string,
+      {
+        address: string;
+      }
+    >;
+  };
+};
+
 type InputParams = {
   useMainnet: null | boolean;
   iconProvider: Provider;
   bscProvider: Provider;
-  abiData: unknown;
+  config: null | Config;
 };
 
 type Protocol = "https" | "http";
@@ -56,7 +88,7 @@ const defaultSDKParams: InputParams = {
     nid: null
   },
   bscProvider: { hostname: networks.mainnet.bsc.provider.hostname, nid: null },
-  abiData: null
+  config: null
 };
 
 // functions
@@ -167,12 +199,17 @@ function getSDKParams(
         result.bscProvider.hostname = inputParams.bscProvider.hostname;
       }
       if (inputParams.bscProvider.nid != null) {
-        result.bscProvider.nid = inputParams.iconProvider.nid;
+        result.bscProvider.nid = inputParams.bscProvider.nid;
       }
     }
 
-    // handle customized abi data if any
-    handleAbiData(inputParams.abiData);
+    // handle customized contract data if any
+    if (inputParams.config !== null) {
+      handleConfigData(
+        result.useMainnet ? "mainnet" : "testnet",
+        inputParams.config
+      );
+    }
   }
   return result;
 }
@@ -447,10 +484,10 @@ function getAbiFromMethodLabel(method: string, abi: any) {
   return result;
 }
 
-function handleAbiData(data: unknown) {
+function handleConfigData(network: "mainnet" | "testnet", data: Config) {
   if (data) {
     try {
-      lib.dbService.write(data);
+      lib.dbService.write(network, data);
     } catch (error) {
       console.info(error);
     }

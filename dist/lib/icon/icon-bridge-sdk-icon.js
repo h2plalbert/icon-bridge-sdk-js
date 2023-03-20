@@ -250,7 +250,7 @@ class IconBridgeSDKIcon {
                     const errorResult = new Exception(err, `Error running isRestrictionEnabled(). Params:\n** NO PARAMS **\n`);
                     return { error: errorResult.toString() };
                 }
-            }),
+            })
         };
         _IconBridgeSDKIcon_web.set(this, {
             transferNativeCoin: (targetAddress, targetChain, from, amount, stepLimit) => __awaiter(this, void 0, void 0, function* () {
@@ -296,8 +296,8 @@ class IconBridgeSDKIcon {
                     const isMainnet = __classPrivateFieldGet(this, _IconBridgeSDKIcon_params, "f").useMainnet == null ? true : __classPrivateFieldGet(this, _IconBridgeSDKIcon_params, "f").useMainnet;
                     const btpAddress = __classPrivateFieldGet(this, _IconBridgeSDKIcon_sdkUtils, "f").getBTPAddress(targetAddress, targetChain, isMainnet);
                     const btsContract = __classPrivateFieldGet(this, _IconBridgeSDKIcon_sdkUtils, "f").getContractOfLabelFromLocalData("bts", "icon", isMainnet, false);
-                    const parsedValues = _values.map(value => {
-                        return __classPrivateFieldGet(this, _IconBridgeSDKIcon_iconWeb3, "f").decimalToHex(Number(value) * (10 ** 18));
+                    const parsedValues = _values.map((value) => {
+                        return __classPrivateFieldGet(this, _IconBridgeSDKIcon_iconWeb3, "f").decimalToHex(Number(value) * 10 ** 18);
                     });
                     const txRequest = yield webLib_1.default.makeTxRequest(__classPrivateFieldGet(this, _IconBridgeSDKIcon_sdkUtils, "f"), __classPrivateFieldGet(this, _IconBridgeSDKIcon_iconWeb3, "f"), from, btsContract, "transferBatch", { _coinNames: _coinNames, _values: parsedValues, _to: btpAddress }, 0, stepLimit, __classPrivateFieldGet(this, _IconBridgeSDKIcon_params, "f").iconProvider.nid);
                     const txObj = this.parseTxParams(txRequest);
@@ -458,13 +458,14 @@ class IconBridgeSDKIcon {
                     const errorResult = new Exception(err, `Error running disableRestrictions(). Params:\nfrom: ${from}\nstepLimit: ${stepLimit}\n`);
                     return { error: errorResult.toString() };
                 }
-            }),
+            })
         });
         this.makeReadonlyQuery = (methodName, methodParams = null) => __awaiter(this, void 0, void 0, function* () {
             const isMainnet = __classPrivateFieldGet(this, _IconBridgeSDKIcon_params, "f").useMainnet == null ? true : __classPrivateFieldGet(this, _IconBridgeSDKIcon_params, "f").useMainnet;
             const btsContract = __classPrivateFieldGet(this, _IconBridgeSDKIcon_sdkUtils, "f").getContractOf("bts", "icon", isMainnet);
             const JSONRPCObject = __classPrivateFieldGet(this, _IconBridgeSDKIcon_iconWeb3, "f").makeICXCallRequestObj(methodName, methodParams, null, btsContract);
             const request = yield __classPrivateFieldGet(this, _IconBridgeSDKIcon_sdkUtils, "f").makeJsonRpcCall(__classPrivateFieldGet(this, _IconBridgeSDKIcon_params, "f").iconProvider.hostname, JSONRPCObject, this.queryMethod);
+            console.log("btsContract", btsContract, isMainnet, methodName, methodParams, __classPrivateFieldGet(this, _IconBridgeSDKIcon_params, "f").iconProvider.hostname, JSONRPCObject, this.queryMethod);
             return request;
         });
         this.parseTxParams = (txParams) => {

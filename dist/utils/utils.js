@@ -22,7 +22,7 @@ const defaultSDKParams = {
         nid: null
     },
     bscProvider: { hostname: networks_1.networks.mainnet.bsc.provider.hostname, nid: null },
-    abiData: null
+    config: null
 };
 function getBTPAddress(address, chain, isMainnet = true) {
     let result = null;
@@ -97,10 +97,12 @@ function getSDKParams(inputParams, defaultParams = defaultSDKParams) {
                 result.bscProvider.hostname = inputParams.bscProvider.hostname;
             }
             if (inputParams.bscProvider.nid != null) {
-                result.bscProvider.nid = inputParams.iconProvider.nid;
+                result.bscProvider.nid = inputParams.bscProvider.nid;
             }
         }
-        handleAbiData(inputParams.abiData);
+        if (inputParams.config !== null) {
+            handleConfigData(result.useMainnet ? "mainnet" : "testnet", inputParams.config);
+        }
     }
     return result;
 }
@@ -236,10 +238,10 @@ function getAbiFromMethodLabel(method, abi) {
     }
     return result;
 }
-function handleAbiData(data) {
+function handleConfigData(network, data) {
     if (data) {
         try {
-            lib_1.default.dbService.write(data);
+            lib_1.default.dbService.write(network, data);
         }
         catch (error) {
             console.info(error);

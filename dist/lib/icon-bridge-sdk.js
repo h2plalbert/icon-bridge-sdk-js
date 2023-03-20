@@ -159,12 +159,10 @@ class IconBridgeSDK {
             const signedTx = yield web3Wrapper.eth.accounts.signTransaction(tx, pk);
             let contractMethodCallResponse = null;
             if (queryMethod == null) {
-                contractMethodCallResponse = yield web3Wrapper.eth
-                    .sendSignedTransaction(signedTx.rawTransaction);
+                contractMethodCallResponse = yield web3Wrapper.eth.sendSignedTransaction(signedTx.rawTransaction);
             }
             else {
-                const contractMethodCallResponseRaw = yield this.sdkUtils
-                    .makeEthSendRawTransactionQuery(this.params.bscProvider.hostname, signedTx.rawTransaction, queryMethod);
+                const contractMethodCallResponseRaw = yield this.sdkUtils.makeEthSendRawTransactionQuery(this.params.bscProvider.hostname, signedTx.rawTransaction, queryMethod);
                 if (contractMethodCallResponseRaw.error != null) {
                     throw new Error(JSON.stringify(contractMethodCallResponseRaw));
                 }

@@ -9,12 +9,45 @@ type Provider = {
   nid?: null | number;
 };
 
+type Config = {
+  network: Record<
+    string,
+    {
+      network_id: string;
+      btp_network_id: string;
+      block_height: number;
+      provider: {
+        hostname: string;
+        nid: number;
+      };
+    }
+  >;
+  contract: {
+    bsc: Record<
+      string,
+      {
+        address: string;
+        implementation: {
+          address: string | null;
+        };
+      }
+    >;
+    icon: Record<
+      string,
+      {
+        address: string;
+      }
+    >;
+  };
+};
+
 type InputParams = {
   useMainnet: null | boolean;
   iconProvider?: Provider;
   bscProvider?: Provider;
-  abiData?: unknown;
+  config?: Config;
 };
+
 // variables
 const defaultParams = {
   useMainnet: true
